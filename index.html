@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html ng-app='distortion'>
+  <head>
+    <meta charset="utf-8">
+    <title>Rythm.js</title>
+    <link rel="stylesheet" href="index.css" media="screen" title="no title" charset="utf-8">
+  </head>
+  <body ng-controller="DistortionController as vm">
+    <div>
+      <div>Gain</div>
+      <input ng-model="vm.gain" ng-change="vm.changeGain(vm.gain)" min="0" step="1" max="10" type="range" />
+    </div>
+    <div>
+      <div>Distortion</div>
+      <input ng-model="vm.distortion" ng-change="vm.changeDistortion(vm.distortion)" min="0" step="1" max="20" type="range" />
+    </div>
+    <div ng-repeat="(name, frequency) in vm.equalizer">
+      <div>{{name}}</div>
+      <input ng-model="frequency.value" ng-change="vm.changeEqualizer(frequency.value, frequency.node)" min="-20" step="2" max="20" type="range" />
+    </div>
+    <script type="text/javascript" src="./node_modules/angular/angular.js"></script>
+    <script type="text/javascript" src="./src/index.js"></script>
+  </body>
+</html>
