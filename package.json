@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node ./start.js"
+    "start": "gulp"
   },
   "repository": {
     "type": "git",
@@ -12,9 +12,6 @@
   },
   "author": "",
   "license": "ISC",
-  "scripts": {
-    "start": "gulp"
-  },
   "bugs": {
     "url": "https://github.com/Okazari/javascript-distortion-pedal/issues"
   },
@@ -22,5 +19,8 @@
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-webserver": "^0.9.1"
+  },
+  "dependencies": {
+    "angular": "^1.5.8"
   }
 }
