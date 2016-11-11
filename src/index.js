@@ -79,7 +79,7 @@ function DistortionController () {
   lastEqualizerNode.connect(distortionNode)
   distortionNode.connect(gainNode)
   gainNode.connect(audioContext.destination)
-  // audio.play()
+  audio.play()
 
   
 }
