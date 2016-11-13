@@ -5,7 +5,14 @@
     <title>Rythm.js</title>
     <link rel="stylesheet" href="index.css" media="screen" title="no title" charset="utf-8">
   </head>
+
   <body ng-controller="DistortionController as vm">
+    <div>
+      <label for="audioSource">Source</label>
+      <select name="audioSource" ng-change="vm.changeSource(vm.selectedSource)" ng-model="vm.selectedSource">
+        <option ng-repeat="source in vm.sources" value="{{source.url}}">{{source.name}}</option>
+      </select>
+    </div>
     <div>
       <div>Gain</div>
       <input ng-model="vm.gain" ng-change="vm.changeGain(vm.gain)" min="0" step="1" max="10" type="range" />
@@ -21,4 +28,5 @@
     <script type="text/javascript" src="./node_modules/angular/angular.js"></script>
     <script type="text/javascript" src="./src/index.js"></script>
   </body>
+
 </html>
