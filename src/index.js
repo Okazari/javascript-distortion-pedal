@@ -15,7 +15,8 @@ function DistortionController () {
     {name: 'Guitare acoustique 1', url: './assets/acoustic.wav'},
     {name: 'Guitare acoustique 2', url: './assets/acoustic2.wav'},
     {name: 'Guitare acoustique 5', url: './assets/acoustic5.wav'},
-    {name: 'Violon', url: './assets/violin.wav'}
+    {name: 'Violon', url: './assets/violin.wav'},
+    {name: 'Microphone', microphone: true}
   ];
 
   vm.gain = 50;
@@ -103,6 +104,7 @@ function DistortionController () {
   vm.changeSource = function(sourceName) {
     const source = vm.sources.find(s => s.name === sourceName);
 
+    var promise
     if(vm.audioSource) {
       vm.sourceNode.disconnect(0);
     }
@@ -111,14 +113,38 @@ function DistortionController () {
       vm.audioSource.loop = true;
       vm.audioSource.play();
       vm.sourceNode = audioContext.createMediaElementSource(vm.audioSource);
+      promise = Promise.resolve(vm.sourceNode)
     }
     else if (source.note) {
       vm.sourceNode = audioContext.createOscillator();
-      vm.sourceNode.start(audioContext.currentTime);
+      vm.sourceNode.start(audioContext.currentTime)
+      promise = Promise.resolve(vm.sourceNode);
+    } else if (source.microphone) {
+      var promise = vm.getMicrophoneStream().then(function(stream){
+        vm.audioSource = stream;
+        vm.sourceNode = audioContext.createMediaStreamSource(stream);
+        return vm.sourceNode
+      })
     }
-
-    vm.sourceNode.connect(equalizerNodes[0]);
+    promise.then(sourceNode => {
+      sourceNode.connect(equalizerNodes[0]);
+    })
   };
+
+  vm.getMicrophoneStream = function() {
+    navigator.getUserMedia = (navigator.getUserMedia ||
+                              navigator.webkitGetUserMedia ||
+                              navigator.mozGetUserMedia ||
+                              navigator.msGetUserMedia);
+    return new Promise(function(resolve, reject){
+      navigator.getUserMedia({audio:true},
+        function(medias){
+          resolve(medias);
+        },function(error){
+          reject(error);
+        })
+    });
+  }
 
 
   // Osciloscope managment
