@@ -5,12 +5,13 @@ angular.module('distortion', []);
 angular.module('distortion').controller('DistortionController', DistortionController);
 
 function DistortionController () {
-  var vm = this;
+  const vm = this;
 
   //Config
-  var equalizerFrequencies = [50, 100, 200, 400, 800, 1500, 3000, 5000, 7000, 10000, 15000];
+  const equalizerFrequencies = [50, 100, 200, 400, 800, 1500, 3000, 5000, 7000, 10000, 15000];
 
   vm.sources = [
+    {name: 'LA3 sine', note: '440'},
     {name: 'Guitare acoustique 1', url: './assets/acoustic.wav'},
     {name: 'Guitare acoustique 2', url: './assets/acoustic2.wav'},
     {name: 'Guitare acoustique 5', url: './assets/acoustic5.wav'},
@@ -21,10 +22,10 @@ function DistortionController () {
   vm.distortion = 0;
   vm.equalizer = {};
   //Creation du contexte audio
-  var audioContext = new AudioContext();
+  const audioContext = new AudioContext();
 
   //Creation du noeud de gain
-  var gainNode = audioContext.createGain();
+  const gainNode = audioContext.createGain();
   gainNode.gain.value = vm.gain / 100;
 
   vm.changeGain = function(value) {
@@ -32,9 +33,9 @@ function DistortionController () {
   };
 
   //Creation du noeud de distortion
-  var distortionNode = audioContext.createWaveShaper();
+  const distortionNode = audioContext.createWaveShaper();
   function makeDistortionCurve(amount) {
-    var k = typeof amount === 'number' ? amount : 50,
+    let k = typeof amount === 'number' ? amount : 50,
       n_samples = 44100,
       curve = new Float32Array(n_samples),
       deg = Math.PI / 180,
@@ -54,8 +55,8 @@ function DistortionController () {
   };
 
   //Creation des noeud de l'equalizer'
-  var equalizerNodes = equalizerFrequencies.map(function(frequency) {
-    var filterNode = audioContext.createBiquadFilter();
+  const equalizerNodes = equalizerFrequencies.map(function(frequency) {
+    const filterNode = audioContext.createBiquadFilter();
     filterNode.type = "peaking";
     filterNode.frequency.value = frequency;
     filterNode.gain.value = 0;
@@ -71,29 +72,111 @@ function DistortionController () {
     node.gain.value = value;
   }
 
+  // Analyser nodes Creation
+  const analyserOsciloscope = audioContext.createAnalyser();
+  analyserOsciloscope.fftSize = 2048;
+  analyserOsciloscope.maxDecibels = 10;
+  analyserOsciloscope.minDecibels = 0;
+  window.analyserOsciloscope = analyserOsciloscope;
+
+  const analyserSpectre = audioContext.createAnalyser();
+  analyserSpectre.fftSize = 256;
+  analyserOsciloscope.maxDecibels = 10;
+  analyserOsciloscope.minDecibels = 0;
+
   /*
     Branchement des nodes :
-    [source] => [gain] => [output]
+    [source] => [gain] => [analyser pour oscilloscope] => [analyser pour spectrometre] => [output]
   */
 
-  var lastEqualizerNode = equalizerNodes.reduce(function(previousNode, frequency) {
+  const lastEqualizerNode = equalizerNodes.reduce(function(previousNode, frequency) {
     previousNode && previousNode.connect(frequency);
     return frequency;
   }, null);
   lastEqualizerNode.connect(distortionNode);
   distortionNode.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  gainNode.connect(analyserOsciloscope);
+  analyserOsciloscope.connect(analyserSpectre);
+  analyserSpectre.connect(audioContext.destination);
 
   //Creation de la source audio
-  vm.changeSource = function(source) {
+  vm.changeSource = function(sourceName) {
+    const source = vm.sources.find(s => s.name === sourceName);
+
     if(vm.audioSource) {
       vm.sourceNode.disconnect(0);
     }
-    vm.audioSource = new Audio(source);
-    vm.audioSource.loop = true;
-    vm.audioSource.play();
+    if(source.url) {
+      vm.audioSource = new Audio(source.url);
+      vm.audioSource.loop = true;
+      vm.audioSource.play();
+      vm.sourceNode = audioContext.createMediaElementSource(vm.audioSource);
+    }
+    else if (source.note) {
+      vm.sourceNode = audioContext.createOscillator();
+      vm.sourceNode.start(audioContext.currentTime);
+    }
 
-    vm.sourceNode = audioContext.createMediaElementSource(vm.audioSource);
     vm.sourceNode.connect(equalizerNodes[0]);
   };
+
+
+  // Osciloscope managment
+  const osciloscope = document.getElementById('oscilloscope');
+  const osciloCtx = osciloscope.getContext('2d');
+  const bufferLength = analyserOsciloscope.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  function drawOsciloscope() {
+      requestAnimationFrame(drawOsciloscope);
+      osciloCtx.fillStyle = 'rgb(0, 0, 0)';
+      osciloCtx.fillRect(0, 0, osciloscope.width, osciloscope.height);
+      osciloCtx.lineWidth = 2;
+      osciloCtx.strokeStyle = 'rgb(200, 50, 50)';
+
+      analyserOsciloscope.getByteTimeDomainData(dataArray);
+
+      osciloCtx.beginPath();
+
+      const sliceWidth = osciloscope.width * 1.0 / bufferLength;
+      let x = 0;
+      for(let i = 0; i < bufferLength; i++) {
+        const y = (dataArray[i] / 128.0) * (osciloscope.height / 2);
+
+        if(i === 0) { osciloCtx.moveTo(x, y); }
+        else { osciloCtx.lineTo(x, y); }
+
+        x += sliceWidth;
+      }
+      osciloCtx.stroke();
+  }
+  drawOsciloscope();
+
+  // Spectrometre managment
+  const spectre = document.getElementById('spectre');
+  const spectreCtx = spectre.getContext('2d');
+  const bufferSpectreLength = analyserSpectre.frequencyBinCount;
+  const dataSpectreArray = new Uint8Array(bufferSpectreLength);
+
+  function drawSpectre() {
+    requestAnimationFrame(drawSpectre);
+
+    analyserSpectre.getByteFrequencyData(dataSpectreArray);
+
+    spectreCtx.fillStyle = 'rgb(0, 0, 0)';
+    spectreCtx.fillRect(0, 0, spectre.width, spectre.height);
+
+    const lBarre = Math.floor((spectre.width / bufferSpectreLength) * 2.5);
+
+    let x = 0;
+    for(let i = 0; i < bufferSpectreLength; i++) {
+      let hBarre = dataSpectreArray[i] /1.5;
+
+      spectreCtx.fillStyle = 'rgb(200,50,50)';
+      spectreCtx.fillRect(x, spectre.height - hBarre / 1.5, lBarre, hBarre);
+
+      x += lBarre + 1;
+    }
+  }
+  drawSpectre();
 }
