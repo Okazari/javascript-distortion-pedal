@@ -166,14 +166,14 @@ function DistortionController () {
     spectreCtx.fillStyle = 'rgb(0, 0, 0)';
     spectreCtx.fillRect(0, 0, spectre.width, spectre.height);
 
-    const lBarre = (spectre.width / bufferSpectreLength) * 2.5;
+    const lBarre = Math.floor((spectre.width / bufferSpectreLength) * 2.5);
 
     let x = 0;
     for(let i = 0; i < bufferSpectreLength; i++) {
-      let hBarre = dataSpectreArray[i] / 2;
+      let hBarre = dataSpectreArray[i] /1.5;
 
-      spectreCtx.fillStyle = 'rgb(' + (hBarre+100) + ',50,50)';
-      spectreCtx.fillRect(x, spectre.height - hBarre / 2, lBarre, hBarre);
+      spectreCtx.fillStyle = 'rgb(200,50,50)';
+      spectreCtx.fillRect(x, spectre.height - hBarre / 1.5, lBarre, hBarre);
 
       x += lBarre + 1;
     }
