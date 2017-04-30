@@ -8,7 +8,7 @@ function DistortionController () {
   const vm = this;
 
   //Config
-  const equalizerFrequencies = [50, 100, 200, 400, 800, 1500, 3000, 5000, 7000, 10000, 15000];
+  const equalizerFrequencies = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
 
   vm.sources = [
     {name: 'LA3 sine', note: '440'},
