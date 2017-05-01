@@ -20,11 +20,17 @@ function DistortionController () {
   ];
 
   vm.gain = 50;
+  vm.reverb = 0;
   vm.distortion = 0;
   vm.equalizer = {};
   //Creation du contexte audio
   const audioContext = new AudioContext();
 
+  //Creation du convolver
+  const convolver = audioContext.createConvolver();
+  const convolverGain = audioContext.createGain()
+  const masterCompression = audioContext.createDynamicsCompressor()
+  
   //Creation du noeud de gain
   const gainNode = audioContext.createGain();
   gainNode.gain.value = vm.gain / 100;
@@ -32,6 +38,21 @@ function DistortionController () {
   vm.changeGain = function(value) {
     gainNode.gain.value = value / 100;
   };
+
+  fetch('/assets/convolver.wav').then(res => res.arrayBuffer()).then(audioData => {
+    audioContext.decodeAudioData(audioData, function(buffer) {
+      const concertHallBuffer = buffer;
+      convolver.buffer = concertHallBuffer
+      convolver.loop = true
+      convolver.normalize = true
+      convolverGain.gain.value = 0
+      convolverGain.connect(convolver)
+      convolver.connect(gainNode)
+      vm.changeReverb = (value) => {
+        convolverGain.gain.value = value
+      }
+    }, function(e){"Error with decoding audio data" + e.err});
+  })
 
   //Creation du noeud de distortion
   const distortionNode = audioContext.createWaveShaper();
@@ -101,9 +122,11 @@ function DistortionController () {
     previousNode && previousNode.connect(frequency);
     return frequency;
   }, null);
-  lastEqualizerNode.connect(distortionNode);
-  distortionNode.connect(gainNode);
-  gainNode.connect(analyserOsciloscope);
+  lastEqualizerNode.connect(gainNode);
+  lastEqualizerNode.connect(convolverGain);
+  gainNode.connect(masterCompression)
+  masterCompression.connect(distortionNode)
+  distortionNode.connect(analyserOsciloscope);
   analyserOsciloscope.connect(analyserSpectre);
   analyserSpectre.connect(audioContext.destination);
 
