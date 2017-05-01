@@ -19,8 +19,8 @@ function makeDistortionCurve(amount) {
 distortionNode.oversample = '4x'
 distortionNode.curve = makeDistortionCurve(0)
 
-addController('Distortion', 0, 100, 1, 0, value => {
-  distortionNode.curve = makeDistortionCurve(parseInt(value))
+addController('Distortion', 0, 1, 0.1, 0, value => {
+  distortionNode.curve = makeDistortionCurve(parseInt(20 * value))
 })
 
 export default distortionNode
