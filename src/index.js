@@ -8,7 +8,7 @@ function DistortionController () {
   const vm = this;
 
   //Config
-  const equalizerFrequencies = [50, 100, 200, 400, 800, 1500, 3000, 5000, 7000, 10000, 15000];
+  const equalizerFrequencies = [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
 
   vm.sources = [
     {name: 'LA3 sine', note: '440'},
@@ -51,9 +51,6 @@ function DistortionController () {
   distortionNode.curve = makeDistortionCurve(vm.distortion);
   distortionNode.oversample = '4x';
 
-  vm.changeDistortion = function(value) {
-    distortionNode.curve = makeDistortionCurve(parseInt(value));
-  };
 
   //Creation des noeud de l'equalizer'
   const equalizerNodes = equalizerFrequencies.map(function(frequency) {
@@ -61,6 +58,8 @@ function DistortionController () {
     filterNode.type = "peaking";
     filterNode.frequency.value = frequency;
     filterNode.gain.value = 0;
+    filterNode.Q.value = 5;
+    // filterNode.detune.value = 20;
     vm.equalizer[frequency] = {
       node : filterNode,
       value: 0
@@ -68,6 +67,14 @@ function DistortionController () {
     return filterNode;
   });
 
+  vm.changeDistortion = function(value) {
+    const disto = parseInt(20 * (0 + (value/100)))
+    const equalizerQ = 4.5 * (1 - (value/100)) + 0.5
+    console.log('Disto set to', disto)
+    console.log('EqualizeQ set to', equalizerQ)
+    distortionNode.curve = makeDistortionCurve(disto)
+    equalizerNodes.forEach(node => node.Q.value =  equalizerQ)
+  };
   vm.changeEqualizer = function(value, node) {
     console.log('frequency', node.frequency.value, 'set to', value);
     node.gain.value = value;
@@ -145,7 +152,6 @@ function DistortionController () {
         })
     });
   }
-
 
   // Osciloscope managment
   const osciloscope = document.getElementById('oscilloscope');
