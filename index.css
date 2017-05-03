@@ -2,17 +2,35 @@ body {
   background-color: black;
   color: white;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.grow {
+  flex-grow: 1;
+  margin: 30px;
+}
+
+.wrapper {
+  align-items: center;
+  justify-content: space-around;
+  display: flex;
+  width: 90vw;
+  padding: 30px;
 }
 
 #container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 30px;
 }
 
 #container > div {
   display: flex;
   flex-direction: column;
+  min-width: 300px;
   width: 20vw;
 }
 
@@ -39,9 +57,9 @@ button:hover {
   background-color: white;
 }
 
-#container > div.title {
+.title {
   align-items: center;
-  margin: 20px;
+  margin: 30px;
   font-size: 20px;
 }
 
@@ -53,8 +71,8 @@ button:hover {
   -webkit-appearance: none;
   width: 15px;
   height: 15px;
-  background-color: rgb(200, 50, 50);
-  border: solid 1px rgb(200, 50, 50);
+  background-color: #ABDCF6;
+  border: solid 1px #ABDCF6;
   border-radius: 15px;
 }
 
@@ -63,7 +81,7 @@ button:hover {
   cursor: pointer;
 
   /* Hides the slider so custom styles can be added */
-  background: transparent; 
+  background: transparent;
   border-color: transparent;
   color: transparent;
 }

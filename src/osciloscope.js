@@ -1,5 +1,5 @@
   import audioContext from './audioContext'
-  
+
   const analyserOsciloscope = audioContext.createAnalyser();
   analyserOsciloscope.fftSize = 2048;
   analyserOsciloscope.maxDecibels = 10;
@@ -15,7 +15,7 @@
       osciloCtx.fillStyle = 'rgb(0, 0, 0)';
       osciloCtx.fillRect(0, 0, osciloscope.width, osciloscope.height);
       osciloCtx.lineWidth = 2;
-      osciloCtx.strokeStyle = 'rgb(200, 50, 50)';
+      osciloCtx.strokeStyle = '#ABDCF6';
 
       analyserOsciloscope.getByteTimeDomainData(dataArray);
 

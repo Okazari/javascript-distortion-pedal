@@ -2,7 +2,7 @@ import audioContext from './audioContext'
 
 const analyserSpectre = audioContext.createAnalyser()
 analyserSpectre.fftSize = 256
-
+analyserSpectre.smoothingTimeConstant = 0.9;
 const spectre = document.getElementById('spectre')
 const spectreCtx = spectre.getContext('2d')
 const bufferSpectreLength = analyserSpectre.frequencyBinCount
@@ -20,9 +20,9 @@ const drawSpectre = () => {
 
   let x = 0
   for(let i = 0; i < bufferSpectreLength; i++) {
-    let hBarre = dataSpectreArray[i] /1.5
+    let hBarre = dataSpectreArray[i]
 
-    spectreCtx.fillStyle = 'rgb(200,50,50)'
+    spectreCtx.fillStyle = '#ABDCF6'
     spectreCtx.fillRect(x, spectre.height - hBarre / 1.5, lBarre, hBarre)
 
     x += lBarre + 1

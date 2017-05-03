@@ -5,15 +5,18 @@
     <title>Javascript distorsion pedal</title>
     <link rel="stylesheet" href="index.css" media="screen" title="no title" charset="utf-8">
   </head>
-
   <body>
-    <div id="container">
-      <div class="title">Javascript distorsion pedal</div>
-      <button id="play">Play</button>
+    <div class="title">Javascript distorsion pedal</div>
+    <div class="wrapper">
+      <div id="container">
+        <button id="play">Play</button>
+      </div>
+      <div class="grow">
+        <canvas id="oscilloscope" width="1000px" height="200px"></canvas>
+        <canvas id="spectre" width="1000px" height="200px"></canvas>
+      </div>
+      <script type="text/javascript" src="./build/JSDistoPedal.js"></script>
     </div>
-    <canvas id="oscilloscope" style="width:80%; height:100px; margin-left:10%;"></canvas>
-    <canvas id="spectre" style="width:80%; height:100px; margin-left:10%;"></canvas>
-    <script type="text/javascript" src="./build/JSDistoPedal.js"></script>
   </body>
 
 </html>
