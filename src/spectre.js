@@ -17,5 +17,3 @@ const drawSpectre = () => {
 }
 
 drawSpectre()
-
-export default analyserSpectre
