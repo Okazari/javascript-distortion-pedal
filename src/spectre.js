@@ -13,7 +13,6 @@ const drawSpectre = () => {
   initCanva(spectreCtx, spectre)
 
   analyser.getByteFrequencyData(frequenciesPower)
-
   const barWidth = Math.floor((spectre.width / nbFrequencies) * 2.5)
 
   for(let i = 0; i < nbFrequencies; i++) {
