@@ -1,5 +1,6 @@
 import audioContext from './audioContext'
 import { addController } from './utils'
+import equalizer from './equalizer';
 
 //Creation du noeud de distortion
 const distortionNode = audioContext.createWaveShaper()
@@ -22,6 +23,7 @@ function makeDistortionCurve(amount) {
 
 addController('Distortion', 0, 1, 0.1, 0, value => {
   distortionNode.curve = makeDistortionCurve(parseInt(20 * value))
+  equalizer.forEach(node => node.Q.value = (2 * (1-value)) + 3)
 })
 
 export default distortionNode
