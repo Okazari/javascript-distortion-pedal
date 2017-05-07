@@ -17,6 +17,7 @@ function drawOsciloscope() {
   osciloCtx.lineWidth = 2;
   osciloCtx.strokeStyle = '#ABDCF6';
 
+
   analyserOsciloscope.getByteTimeDomainData(dataArray);
 
   osciloCtx.beginPath();
@@ -28,6 +29,7 @@ function drawOsciloscope() {
 
     if(i === 0) { osciloCtx.moveTo(x, y); }
     else { osciloCtx.lineTo(x, y); }
+
     x += sliceWidth;
   }
   osciloCtx.stroke();
