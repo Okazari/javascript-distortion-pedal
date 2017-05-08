@@ -13,7 +13,7 @@ addController('Reverb', 0, 1, 0.1, 0, value => {
 
 export const masterCompression = audioContext.createDynamicsCompressor()
 
-fetch('/assets/convolver.wav').then(res => res.arrayBuffer()).then(audioData => {
+fetch('/assets/disto.wav').then(res => res.arrayBuffer()).then(audioData => {
   audioContext.decodeAudioData(audioData, (buffer) => {
     const concertHallBuffer = buffer
     convolver.buffer = concertHallBuffer
