@@ -1,24 +1,18 @@
 import audioContext from './audioContext'
-
+import { initCanva, addBar } from './utils'
 const spectre = document.getElementById('spectre')
 const spectreCtx = spectre.getContext('2d')
 
 const drawSpectre = () => {
   requestAnimationFrame(drawSpectre)
+  initCanva(spectreCtx, spectre)
 
-  spectreCtx.fillStyle = 'rgb(0, 0, 0)'
-  spectreCtx.fillRect(0, 0, spectre.width, spectre.height)
+  const nbBars = 150
+  const barWidth = Math.floor((spectre.width / nbBarres) * 2.5)
 
-  const lBarre = Math.floor((spectre.width / 150) * 2.5)
-
-  let x = 0
-  for(let i = 0; i < 150; i++) {
-    const hBarre = 50
-
-    spectreCtx.fillStyle = '#ABDCF6'
-    spectreCtx.fillRect(x, spectre.height - hBarre / 1.5, lBarre, hBarre)
-
-    x += lBarre + 1
+  for(let i = 0; i < nbBarres; i++) {
+    const barHeight = 50
+    addBar(spectreCtx, spectre, barWidth, barHeight)
   }
 }
 
