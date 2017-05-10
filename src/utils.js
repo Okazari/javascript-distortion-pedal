@@ -36,13 +36,16 @@ export const connectPlayButton = (audioSource) => {
   })
 }
 
+
+let x
+
 export const initCanva = (context, elem) => {
   context.fillStyle = 'rgb(0, 0, 0)'
   context.fillRect(0, 0, elem.width, elem.height)
   context.fillStyle = '#ABDCF6'
+  x = 0
 }
 
-let x = 0
 export const addBar = (context, elem, width, height) => {
   context.fillRect(x, elem.height - height / 1.5, width, height)
   x += width + 1
