@@ -37,9 +37,10 @@ export const connectPlayButton = (audioSource) => {
 }
 
 
-let x
+let x = 0
 
 export const initCanva = (context, elem) => {
+  x = 0
   context.fillStyle = 'rgb(0, 0, 0)'
   context.fillRect(0, 0, elem.width, elem.height)
   context.fillStyle = '#ABDCF6'
