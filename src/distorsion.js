@@ -16,5 +16,3 @@ function makeDistortionCurve(amount) {
 };
 
 addController('Distortion', 0, 1, 0.1, 0, value => {})
-
-export default distortionNode
