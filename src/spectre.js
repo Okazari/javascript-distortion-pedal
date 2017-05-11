@@ -8,14 +8,12 @@ const drawSpectre = () => {
   initCanva(spectreCtx, spectre)
 
   const nbBars = 150
-  const barWidth = Math.floor((spectre.width / nbBarres) * 2.5)
+  const barWidth = Math.floor((spectre.width / nbBars) * 2.5)
 
-  for(let i = 0; i < nbBarres; i++) {
+  for(let i = 0; i < nbBars; i++) {
     const barHeight = 50
     addBar(spectreCtx, spectre, barWidth, barHeight)
   }
 }
 
 drawSpectre()
-
-export default analyserSpectre
