@@ -3,16 +3,16 @@ import source from './source'
 import gain from './gain'
 import spectre from './spectre'
 import osciloscope from './osciloscope'
-import distortion from './distorsion'
+import distortion from './distortion'
 import equalizerNodes from './equalizer'
 import { convolver, convolverGain, masterCompression } from './reverb'
 
-source.connect(distortion)
-distortion.connect(gain)
+source.connect(distortion.input)
+distortion.output.connect(gain)
 
 gain.connect(masterCompression)
 
-distortion.connect(convolverGain)
+distortion.output.connect(convolverGain)
 convolverGain.connect(convolver)
 convolver.connect(masterCompression)
 
