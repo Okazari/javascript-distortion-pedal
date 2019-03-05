@@ -7,8 +7,8 @@ const getMicrophoneStream = () => {
     navigator.webkitGetUserMedia ||
     navigator.mozGetUserMedia ||
     navigator.msGetUserMedia
-    return new Promise((resolve, reject) => {
-      navigator.getUserMedia(
+  return new Promise((resolve, reject) => {
+    navigator.getUserMedia(
       { audio: true },
       medias => resolve(medias),
       error => reject(error)
@@ -22,13 +22,13 @@ function makeDistortionCurve(amount) {
     curve = new Float32Array(n_samples),
     deg = Math.PI / 180,
     i = 0,
-    x;
+    x
   for (; i < n_samples; ++i) {
-    x = i * 2 / n_samples - 1;
-    curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
+    x = (i * 2) / n_samples - 1
+    curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x))
   }
-  return curve;
-};
+  return curve
+}
 
 class MyAudioContext {
   constructor() {
@@ -40,7 +40,9 @@ class MyAudioContext {
     this.createController('Gain', 0, 0.5, 0.05, initialGain)
     this.createController('Distortion', 0, 1, 0.1, initialDistortion)
     this.osciloscopeHtml = document.getElementById('oscilloscope')
-    this.osciloCanvas = this.osciloscopeHtml.getContext('2d');
+    this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
+    this.spectreHtml = document.getElementById('spectre')
+    this.spectreCanvas = this.spectreHtml.getContext('2d')
   }
 
   init = () => {
@@ -53,7 +55,6 @@ class MyAudioContext {
     })
   }
 
-
   connect = () => {
     this.sourceNode.connect(this.gainNode)
     this.gainNode.connect(this.analyserOsciloscope)
@@ -63,16 +64,18 @@ class MyAudioContext {
 
   createNodes = () => {
     return this.createSourceNode().then(() => {
-    // return this.createMicroSourceNode().then(() => {
+      // return this.createMicroSourceNode().then(() => {
       this.createGainNode()
       this.createDistortionNode()
+      this.createOscillo()
+      this.createSpectre()
     })
   }
 
   createGainNode = () => {
     this.gainNode = this.context.createGain()
     this.gainNode.gain.value = initialGain
-    this.connectController('Gain', (value) => {
+    this.connectController('Gain', value => {
       this.gainNode.gain.value = value
     })
   }
@@ -81,30 +84,27 @@ class MyAudioContext {
     this.distortionNode = this.context.createWaveShaper()
     this.distortionNode.oversample = '4x'
     this.distortionNode.curve = makeDistortionCurve(0)
-    this.connectController('Distortion', (value) => {
+    this.connectController('Distortion', value => {
       this.distortionNode.curve = makeDistortionCurve(parseInt(20 * value))
     })
   }
 
-  connectController = (name, onChange) => {
-    const input = document.getElementById(name)
-    input.addEventListener('change', (event) => {
-      onChange(event.target.value)
-    })
-    input.addEventListener('mousemove', (event) => {
-      onChange(event.target.value)
-    })
-  }
-
   createOscillo = () => {
-    this.analyserOsciloscope = this.context.createAnalyser();
-    this.analyserOsciloscope.fftSize = 2048;
-    this.analyserOsciloscope.maxDecibels = 10;
-    this.analyserOsciloscope.minDecibels = 0;
-    this.bufferLength = this.analyserOsciloscope.frequencyBinCount;
-    this.dataArray = new Uint8Array(this.bufferLength);
+    this.analyserOsciloscope = this.context.createAnalyser()
+    this.analyserOsciloscope.fftSize = 2048
+    this.analyserOsciloscope.maxDecibels = 10
+    this.analyserOsciloscope.minDecibels = 0
+    this.bufferLength = this.analyserOsciloscope.frequencyBinCount
+    this.dataArray = new Uint8Array(this.bufferLength)
   }
 
+  createSpectre = () => {
+    this.analyserSpectre = this.context.createAnalyser()
+    this.analyserSpectre.fftSize = 256
+    this.analyserSpectre.smoothingTimeConstant = 0.9
+    this.bufferSpectreLength = this.analyserSpectre.frequencyBinCount
+    this.dataSpectreArray = new Uint8Array(this.bufferSpectreLength)
+  }
 
   createController = (name, min, max, step, initial) => {
     const container = document.createElement('div')
@@ -112,7 +112,7 @@ class MyAudioContext {
     label.innerText = name
     const input = document.createElement('input')
     input.id = name
-    input.type = "range"
+    input.type = 'range'
     input.min = min
     input.max = max
     input.step = step
@@ -120,6 +120,16 @@ class MyAudioContext {
     container.appendChild(label)
     container.appendChild(input)
     document.getElementById('container').appendChild(container)
+  }
+
+  connectController = (name, onChange) => {
+    const input = document.getElementById(name)
+    input.addEventListener('change', event => {
+      onChange(event.target.value)
+    })
+    input.addEventListener('mousemove', event => {
+      onChange(event.target.value)
+    })
   }
 
   createSourceNode = () => {
@@ -134,26 +144,67 @@ class MyAudioContext {
   }
 
   drawOsciloscope = () => {
-    requestAnimationFrame(this.drawOsciloscope);
-    this.osciloCanvas.fillStyle = 'rgb(0, 0, 0)';
-    this.osciloCanvas.fillRect(0, 0, osciloscopeHtml.width, osciloscopeHtml.height);
-    this.osciloCanvas.lineWidth = 2;
-    this.osciloCanvas.strokeStyle = '#ABDCF6';
-    this.osciloCanvas.beginPath();
+    requestAnimationFrame(this.drawOsciloscope)
+    this.osciloCanvas.fillStyle = 'rgb(0, 0, 0)'
+    this.osciloCanvas.fillRect(
+      0,
+      0,
+      this.osciloscopeHtml.width,
+      this.osciloscopeHtml.height
+    )
+    this.osciloCanvas.lineWidth = 2
+    this.osciloCanvas.strokeStyle = '#ABDCF6'
+    this.osciloCanvas.beginPath()
 
-    this.analyserOsciloscope.getByteTimeDomainData(this.dataArray);
+    this.analyserOsciloscope.getByteTimeDomainData(this.dataArray)
 
-    const sliceWidth = osciloscopeHtml.width * 1.0 / this.bufferLength;
-    let x = 0;
+    const sliceWidth = (this.osciloscopeHtml.width * 1.0) / this.bufferLength
+    let x = 0
     for (let i = 0; i < this.bufferLength; i++) {
-      const y = (this.dataArray[i] / 128.0) * (osciloscopeHtml.height / 2);
+      const y = (this.dataArray[i] / 128.0) * (this.osciloscopeHtml.height / 2)
 
-      if (i === 0) { this.osciloCanvas.moveTo(x, y); }
-      else { this.osciloCanvas.lineTo(x, y); }
+      if (i === 0) {
+        this.osciloCanvas.moveTo(x, y)
+      } else {
+        this.osciloCanvas.lineTo(x, y)
+      }
 
-      x += sliceWidth;
+      x += sliceWidth
     }
-    this.osciloCanvas.stroke();
+    this.osciloCanvas.stroke()
+  }
+
+  drawSpectre = () => {
+    requestAnimationFrame(this.drawSpectre)
+
+    analyserSpectre.getByteFrequencyData(this.dataSpectreArray)
+
+    this.spectreCanvas.fillStyle = 'rgb(0, 0, 0)'
+    this.spectreCanvas.fillRect(
+      0,
+      0,
+      this.spectreHtml.width,
+      this.spectreHtml.height
+    )
+
+    const lBarre = Math.floor(
+      (this.spectreHtml.width / bufferSpectreLength) * 2.5
+    )
+
+    let x = 0
+    for (let i = 0; i < bufferSpectreLength; i++) {
+      let hBarre = dataSpectreArray[i]
+
+      this.spectreCanvas.fillStyle = '#ABDCF6'
+      this.spectreCanvas.fillRect(
+        x,
+        this.spectreHtml.height - hBarre / 1.5,
+        lBarre,
+        hBarre
+      )
+
+      x += lBarre + 1
+    }
   }
 
   connectPlayButton = () => {
