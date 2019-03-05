@@ -1,5 +1,6 @@
 const initialGain = 0.1
 const initialDistortion = 0
+const initialReverbGain = 0
 
 const getMicrophoneStream = () => {
   navigator.getUserMedia =
@@ -39,6 +40,7 @@ class MyAudioContext {
     this.audioSource.loop = true
     this.createController('Gain', 0, 0.5, 0.05, initialGain)
     this.createController('Distortion', 0, 1, 0.1, initialDistortion)
+    this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
     this.osciloscopeHtml = document.getElementById('oscilloscope')
     this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
     this.spectreHtml = document.getElementById('spectre')
@@ -50,16 +52,24 @@ class MyAudioContext {
     this.createNodes().then(() => {
       this.connect()
       this.drawOsciloscope()
+      this.drawSpectre()
       this.play()
       this.connectPlayButton()
     })
   }
 
   connect = () => {
-    this.sourceNode.connect(this.gainNode)
-    this.gainNode.connect(this.analyserOsciloscope)
-    this.analyserOsciloscope.connect(this.distortionNode)
-    this.distortionNode.connect(this.context.destination)
+    this.sourceNode.connect(this.distortionNode)
+    this.distortionNode.connect(this.gainNode)
+    this.gainNode.connect(this.masterCompression)
+
+    this.distortionNode.connect(this.convolverGain)
+    this.convolverGain.connect(this.convolverNode)
+    this.convolverNode.connect(this.masterCompression)
+
+    this.masterCompression.connect(this.analyserOsciloscope)
+    this.analyserOsciloscope.connect(this.analyserSpectre)
+    this.analyserSpectre.connect(this.context.destination)
   }
 
   createNodes = () => {
@@ -67,6 +77,7 @@ class MyAudioContext {
       // return this.createMicroSourceNode().then(() => {
       this.createGainNode()
       this.createDistortionNode()
+      this.createReverbNodes()
       this.createOscillo()
       this.createSpectre()
     })
@@ -87,6 +98,29 @@ class MyAudioContext {
     this.connectController('Distortion', value => {
       this.distortionNode.curve = makeDistortionCurve(parseInt(20 * value))
     })
+  }
+
+  createReverbNodes = () => {
+    this.convolverNode = this.context.createConvolver()
+    this.convolverNode.loop = true
+    this.convolverNode.normalize = true
+
+    this.convolverGain = this.context.createGain()
+    this.convolverGain.gain.value = initialReverbGain
+    this.connectController('Reverb', value => {
+      this.convolverGain.gain.value = value
+    })
+
+    this.masterCompression = this.context.createDynamicsCompressor()
+
+    fetch('/assets/convolver.wav')
+      .then(res => res.arrayBuffer())
+      .then(audioData => {
+        this.context.decodeAudioData(audioData, buffer => {
+          const concertHallBuffer = buffer
+          this.convolverNode.buffer = concertHallBuffer
+        })
+      })
   }
 
   createOscillo = () => {
@@ -177,7 +211,7 @@ class MyAudioContext {
   drawSpectre = () => {
     requestAnimationFrame(this.drawSpectre)
 
-    analyserSpectre.getByteFrequencyData(this.dataSpectreArray)
+    this.analyserSpectre.getByteFrequencyData(this.dataSpectreArray)
 
     this.spectreCanvas.fillStyle = 'rgb(0, 0, 0)'
     this.spectreCanvas.fillRect(
@@ -188,12 +222,12 @@ class MyAudioContext {
     )
 
     const lBarre = Math.floor(
-      (this.spectreHtml.width / bufferSpectreLength) * 2.5
+      (this.spectreHtml.width / this.bufferSpectreLength) * 2.5
     )
 
     let x = 0
-    for (let i = 0; i < bufferSpectreLength; i++) {
-      let hBarre = dataSpectreArray[i]
+    for (let i = 0; i < this.bufferSpectreLength; i++) {
+      let hBarre = this.dataSpectreArray[i]
 
       this.spectreCanvas.fillStyle = '#ABDCF6'
       this.spectreCanvas.fillRect(
