@@ -51,10 +51,10 @@ CONCLUSION ?
 
 2min
 3min
-2m hello world
-2m guitar world
-2m gain world
-4m rock world
-3m analyzerFFT
-4m Amélioration 1 lowcut/hightcut tone
-3m Amélioration 2
+2m hello world step1
+2m guitar world step2
+2m gain world step3
+4m rock world step4
+3m analyzerFFT step5
+4m Amélioration 1 lowcut/hightcut tone step6
+3m Amélioration 2 step7
