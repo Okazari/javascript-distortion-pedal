@@ -2,11 +2,11 @@ const initialGain = 0.1
 const initialDistortion = 0
 const initialReverbGain = 0
 
-const frequenciesCut = [
-  160, 320, 640, 1280, 3560, 7220, 12800,
-].map((freq, index, freqs) => {
-  if(freqs.length > index + 1) return [freq, freqs[index + 1]]
-}).filter(a => a)
+const frequenciesCut = [160, 320, 640, 1280, 3560, 7220, 12800]
+  .map((freq, index, freqs) => {
+    if (freqs.length > index + 1) return [freq, freqs[index + 1]]
+  })
+  .filter(a => a)
 
 const getFrequencyControllerName = (min, max) => `Disto ${min}-${max}`
 const getFrequencyGainName = (min, max) => `Gain ${min}-${max}`
@@ -47,89 +47,92 @@ class MyAudioContext {
     this.playButton = document.getElementById('play')
     this.audioSource = new Audio('./assets/acoustic.wav')
     this.audioSource.loop = true
-    this.createController('Gain', 0, 0.5, 0.05, initialGain)
-    this.createController('Distortion', 0, 1, 0.1, initialDistortion)
-    this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
-    this.osciloscopeHtml = document.getElementById('oscilloscope')
-    this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
-    this.spectreHtml = document.getElementById('spectre')
-    this.spectreCanvas = this.spectreHtml.getContext('2d')
-    frequenciesCut.forEach(([min, max]) => {
-      this.createController(getFrequencyGainName(min, max), 0, 0.5, 0.05, 0)
-      this.createController(getFrequencyControllerName(min, max), 0, 0.5, 0.05, 0)
-    })
+    // this.createController('Gain', 0, 0.5, 0.05, initialGain)
+    // this.createController('Distortion', 0, 1, 0.1, initialDistortion)
+    // this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
+    // this.osciloscopeHtml = document.getElementById('oscilloscope')
+    // this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
+    // this.spectreHtml = document.getElementById('spectre')
+    // this.spectreCanvas = this.spectreHtml.getContext('2d')
+    // frequenciesCut.forEach(([min, max]) => {
+    //   this.createController(getFrequencyGainName(min, max), 0, 0.5, 0.05, 0)
+    //   this.createController(getFrequencyControllerName(min, max), 0, 0.5, 0.05, 0)
+    // })
   }
 
   init = () => {
     this.context = new AudioContext()
     this.createNodes().then(() => {
       this.connect()
-      this.drawOsciloscope()
-      this.drawSpectre()
+      // this.drawOsciloscope()
+      // this.drawSpectre()
       this.play()
       this.connectPlayButton()
     })
   }
 
   connect = () => {
-    this.sourceNode.connect(this.gainNode)
-    const freqOutputNodes = this.freqsNodes.map(({ highcut, lowcut, gain, disto }) => {
-      this.gainNode.connect(lowcut)
-      lowcut.connect(highcut)
-      highcut.connect(gain)
-      gain.connect(disto)
-      return disto
-    })
-    freqOutputNodes.forEach(node => {
-      node.connect(this.masterCompression)
-    })
+    this.sourceNode.connect(this.context.destination)
+    // this.sourceNode.connect(this.gainNode)
+    // const freqOutputNodes = this.freqsNodes.map(
+    //   ({ highcut, lowcut, gain, disto }) => {
+    //     this.gainNode.connect(lowcut)
+    //     lowcut.connect(highcut)
+    //     highcut.connect(gain)
+    //     gain.connect(disto)
+    //     return disto
+    //   }
+    // )
+    // freqOutputNodes.forEach(node => {
+    //   node.connect(this.masterCompression)
+    // })
 
     // this.gainNode.connect(this.masterCompression)
     // this.distortionNode.connect(this.convolverGain)
     // this.convolverGain.connect(this.convolverNode)
     // this.convolverNode.connect(this.masterCompression)
 
-    this.masterCompression.connect(this.analyserOsciloscope)
-    this.analyserOsciloscope.connect(this.analyserSpectre)
-    this.analyserSpectre.connect(this.context.destination)
+    // this.masterCompression.connect(this.analyserOsciloscope)
+    // this.analyserOsciloscope.connect(this.analyserSpectre)
+    // this.analyserSpectre.connect(this.context.destination)
   }
 
   createNodes = () => {
     return this.createSourceNode().then(() => {
-    // return this.createMicroSourceNode().then(() => {
-      this.createGainNode()
-      this.createDistortionNode()
-      this.createReverbNodes()
-      this.createOscillo()
-      this.createSpectre()
-      this.createFreqsDisto()
+      // return this.createMicroSourceNode().then(() => {
+      // this.createGainNode()
+      // this.createDistortionNode()
+      // this.createReverbNodes()
+      // this.createOscillo()
+      // this.createSpectre()
+      // this.createFreqsDisto()
     })
   }
 
   createFreqsDisto = () => {
     this.freqsNodes = frequenciesCut.map(([min, max]) => {
       const lowcut = this.context.createBiquadFilter()
-      lowcut.type = "highpass"
+      lowcut.type = 'highpass'
       lowcut.frequency.value = min
       const highcut = this.context.createBiquadFilter()
-      highcut.type = "lowpass"
+      highcut.type = 'lowpass'
       highcut.frequency.value = max
       const gain = this.context.createGain()
       gain.gain.value = 0
-      this.connectController(getFrequencyGainName(min,max), (value) => {
+      this.connectController(getFrequencyGainName(min, max), value => {
         gain.gain.value = value
       })
       const disto = this.context.createWaveShaper()
       disto.oversample = '4x'
       disto.curve = makeDistortionCurve(0)
-      this.connectController(getFrequencyControllerName(min,max), (value) => {
+      this.connectController(getFrequencyControllerName(min, max), value => {
         disto.curve = makeDistortionCurve(parseInt(20 * value))
       })
       return {
         lowcut,
         highcut,
         gain,
-        disto,
+        disto
       }
     })
   }
