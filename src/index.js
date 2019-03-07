@@ -110,8 +110,8 @@ class MyAudioContext {
   }
 
   createNodes = () => {
-    return this.createSourceNode().then(() => {
-      // return this.createMicroSourceNode().then(() => {
+    // return this.createSourceNode().then(() => {
+    return this.createMicroSourceNode().then(() => {
       this.createGainNode()
       this.createClearGain()
       // this.createDistortionNode()
