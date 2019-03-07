@@ -50,10 +50,10 @@ class MyAudioContext {
     this.createController('Gain', 0, 0.5, 0.05, initialGain)
     this.createController('Distortion', 0, 1, 0.1, initialDistortion)
     // this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
-    // this.osciloscopeHtml = document.getElementById('oscilloscope')
-    // this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
-    // this.spectreHtml = document.getElementById('spectre')
-    // this.spectreCanvas = this.spectreHtml.getContext('2d')
+    this.osciloscopeHtml = document.getElementById('oscilloscope')
+    this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
+    this.spectreHtml = document.getElementById('spectre')
+    this.spectreCanvas = this.spectreHtml.getContext('2d')
     // frequenciesCut.forEach(([min, max]) => {
     //   this.createController(getFrequencyGainName(min, max), 0, 0.5, 0.05, 0)
     //   this.createController(getFrequencyControllerName(min, max), 0, 0.5, 0.05, 0)
@@ -64,8 +64,8 @@ class MyAudioContext {
     this.context = new AudioContext()
     this.createNodes().then(() => {
       this.connect()
-      // this.drawOsciloscope()
-      // this.drawSpectre()
+      this.drawOsciloscope()
+      this.drawSpectre()
       this.play()
       this.connectPlayButton()
     })
@@ -74,7 +74,7 @@ class MyAudioContext {
   connect = () => {
     this.sourceNode.connect(this.gainNode)
     this.gainNode.connect(this.distortionNode)
-    this.distortionNode.connect(this.context.destination)
+    this.distortionNode.connect(this.analyserOsciloscope)
     // this.sourceNode.connect(this.gainNode)
     // const freqOutputNodes = this.freqsNodes.map(
     //   ({ highcut, lowcut, gain, disto }) => {
@@ -95,8 +95,8 @@ class MyAudioContext {
     // this.convolverNode.connect(this.masterCompression)
 
     // this.masterCompression.connect(this.analyserOsciloscope)
-    // this.analyserOsciloscope.connect(this.analyserSpectre)
-    // this.analyserSpectre.connect(this.context.destination)
+    this.analyserOsciloscope.connect(this.analyserSpectre)
+    this.analyserSpectre.connect(this.context.destination)
   }
 
   createNodes = () => {
@@ -105,8 +105,8 @@ class MyAudioContext {
       this.createGainNode()
       this.createDistortionNode()
       // this.createReverbNodes()
-      // this.createOscillo()
-      // this.createSpectre()
+      this.createOscillo()
+      this.createSpectre()
       // this.createFreqsDisto()
     })
   }
