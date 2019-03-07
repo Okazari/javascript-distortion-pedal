@@ -48,7 +48,7 @@ class MyAudioContext {
     // this.audioSource = new Audio('./assets/acoustic.wav')
     // this.audioSource.loop = true
     this.createController('Gain', 0, 0.5, 0.05, initialGain)
-    // this.createController('Distortion', 0, 1, 0.1, initialDistortion)
+    this.createController('Distortion', 0, 1, 0.1, initialDistortion)
     // this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
     // this.osciloscopeHtml = document.getElementById('oscilloscope')
     // this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
@@ -73,7 +73,8 @@ class MyAudioContext {
 
   connect = () => {
     this.sourceNode.connect(this.gainNode)
-    this.gainNode.connect(this.context.destination)
+    this.gainNode.connect(this.distortionNode)
+    this.distortionNode.connect(this.context.destination)
     // this.sourceNode.connect(this.gainNode)
     // const freqOutputNodes = this.freqsNodes.map(
     //   ({ highcut, lowcut, gain, disto }) => {
@@ -102,7 +103,7 @@ class MyAudioContext {
     // return this.createSourceNode().then(() => {
     return this.createMicroSourceNode().then(() => {
       this.createGainNode()
-      // this.createDistortionNode()
+      this.createDistortionNode()
       // this.createReverbNodes()
       // this.createOscillo()
       // this.createSpectre()
