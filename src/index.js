@@ -2,11 +2,11 @@ const initialGain = 0.1
 const initialDistortion = 0
 const initialReverbGain = 0
 
-const frequenciesCut = [
-  160, 320, 640, 1280, 3560, 7220, 12800,
-].map((freq, index, freqs) => {
-  if(freqs.length > index + 1) return [freq, freqs[index + 1]]
-}).filter(a => a)
+const frequenciesCut = [160, 320, 640, 1280, 3560, 7220, 12800]
+  .map((freq, index, freqs) => {
+    if (freqs.length > index + 1) return [freq, freqs[index + 1]]
+  })
+  .filter(a => a)
 
 const getFrequencyControllerName = (min, max) => `Disto ${min}-${max}`
 const getFrequencyGainName = (min, max) => `Gain ${min}-${max}`
@@ -48,15 +48,23 @@ class MyAudioContext {
     this.audioSource = new Audio('./assets/acoustic.wav')
     this.audioSource.loop = true
     this.createController('Gain', 0, 0.5, 0.05, initialGain)
-    this.createController('Distortion', 0, 1, 0.1, initialDistortion)
-    this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
+    this.createController('Clear Gain', 0, 0.5, 0.05, initialGain)
+    this.createController('Distortion Gain', 0, 0.5, 0.05, initialGain)
+    // this.createController('Distortion', 0, 1, 0.1, initialDistortion)
+    // this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
     this.osciloscopeHtml = document.getElementById('oscilloscope')
     this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
     this.spectreHtml = document.getElementById('spectre')
     this.spectreCanvas = this.spectreHtml.getContext('2d')
     frequenciesCut.forEach(([min, max]) => {
-      this.createController(getFrequencyGainName(min, max), 0, 0.5, 0.05, 0)
-      this.createController(getFrequencyControllerName(min, max), 0, 0.5, 0.05, 0)
+      this.createController(getFrequencyGainName(min, max), 0, 0.5, 0.05, 0.25)
+      this.createController(
+        getFrequencyControllerName(min, max),
+        0,
+        0.5,
+        0.05,
+        0.25
+      )
     })
   }
 
@@ -73,17 +81,24 @@ class MyAudioContext {
 
   connect = () => {
     this.sourceNode.connect(this.gainNode)
-    const freqOutputNodes = this.freqsNodes.map(({ highcut, lowcut, gain, disto }) => {
-      this.gainNode.connect(lowcut)
-      lowcut.connect(highcut)
-      highcut.connect(gain)
-      gain.connect(disto)
-      return disto
-    })
+    this.gainNode.connect(this.clearGain)
+    this.clearGain.connect(this.masterCompression)
+
+    const freqOutputNodes = this.freqsNodes.map(
+      ({ highcut, lowcut, gain, disto }) => {
+        this.gainNode.connect(lowcut)
+        lowcut.connect(highcut)
+        highcut.connect(gain)
+        gain.connect(disto)
+        return disto
+      }
+    )
     freqOutputNodes.forEach(node => {
-      node.connect(this.masterCompression)
+      node.connect(this.distoCompression)
     })
 
+    this.distoCompression.connect(this.distoGain)
+    this.distoGain.connect(this.masterCompression)
     // this.gainNode.connect(this.masterCompression)
     // this.distortionNode.connect(this.convolverGain)
     // this.convolverGain.connect(this.convolverNode)
@@ -96,10 +111,12 @@ class MyAudioContext {
 
   createNodes = () => {
     return this.createSourceNode().then(() => {
-    // return this.createMicroSourceNode().then(() => {
+      // return this.createMicroSourceNode().then(() => {
       this.createGainNode()
-      this.createDistortionNode()
-      this.createReverbNodes()
+      this.createClearGain()
+      // this.createDistortionNode()
+      // this.createReverbNodes()
+      this.createMasterCompression()
       this.createOscillo()
       this.createSpectre()
       this.createFreqsDisto()
@@ -107,29 +124,32 @@ class MyAudioContext {
   }
 
   createFreqsDisto = () => {
+    this.distoGain = this.context.createGain()
+    this.distoCompression = this.context.createDynamicsCompressor()
+
     this.freqsNodes = frequenciesCut.map(([min, max]) => {
       const lowcut = this.context.createBiquadFilter()
-      lowcut.type = "highpass"
+      lowcut.type = 'highpass'
       lowcut.frequency.value = min
       const highcut = this.context.createBiquadFilter()
-      highcut.type = "lowpass"
+      highcut.type = 'lowpass'
       highcut.frequency.value = max
       const gain = this.context.createGain()
       gain.gain.value = 0
-      this.connectController(getFrequencyGainName(min,max), (value) => {
+      this.connectController(getFrequencyGainName(min, max), value => {
         gain.gain.value = value
       })
       const disto = this.context.createWaveShaper()
       disto.oversample = '4x'
       disto.curve = makeDistortionCurve(0)
-      this.connectController(getFrequencyControllerName(min,max), (value) => {
+      this.connectController(getFrequencyControllerName(min, max), value => {
         disto.curve = makeDistortionCurve(parseInt(20 * value))
       })
       return {
         lowcut,
         highcut,
         gain,
-        disto,
+        disto
       }
     })
   }
@@ -142,6 +162,14 @@ class MyAudioContext {
     })
   }
 
+  createClearGain = () => {
+    this.clearGain = this.context.createGain()
+    this.clearGain.gain.value = initialGain
+    this.connectController('Clear Gain', value => {
+      this.clearGain.gain.value = value
+    })
+  }
+
   createDistortionNode = () => {
     this.distortionNode = this.context.createWaveShaper()
     this.distortionNode.oversample = '4x'
@@ -149,6 +177,10 @@ class MyAudioContext {
     this.connectController('Distortion', value => {
       this.distortionNode.curve = makeDistortionCurve(parseInt(20 * value))
     })
+  }
+
+  createMasterCompression() {
+    this.masterCompression = this.context.createDynamicsCompressor()
   }
 
   createReverbNodes = () => {
@@ -161,8 +193,6 @@ class MyAudioContext {
     this.connectController('Reverb', value => {
       this.convolverGain.gain.value = value
     })
-
-    this.masterCompression = this.context.createDynamicsCompressor()
 
     fetch('/assets/convolver.wav')
       .then(res => res.arrayBuffer())
