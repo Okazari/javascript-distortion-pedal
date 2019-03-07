@@ -1,8 +1,8 @@
-const initialGain = 5
+const initialGain = 0.5
 const initialDistortion = 0
 const initialReverbGain = 0
 
-const frequenciesCut = [1000, 4000]
+const frequenciesCut = [1000, 8000]
   .map((freq, index, freqs) => {
     if (freqs.length > index + 1) return [freq, freqs[index + 1]]
   })
@@ -46,11 +46,12 @@ class MyAudioContext {
     this.context = null
     this.playing = false
     this.playButton = document.getElementById('play')
-    this.audioSource = new Audio('./assets/acoustic.wav')
-    this.audioSource.loop = true
+    // this.audioSource = new Audio('./assets/acoustic.wav')
+    // this.audioSource.loop = true
     this.createController('Gain', 0, 10, 0.05, initialGain)
+    this.createController('Clear Gain', 0, 10, 0.05, initialGain)
     this.createController('Distortion', 0, 1, 0.1, initialDistortion)
-    this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
+    // this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
     this.osciloscopeHtml = document.getElementById('oscilloscope')
     this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
     this.spectreHtml = document.getElementById('spectre')
@@ -81,6 +82,9 @@ class MyAudioContext {
 
   connect = () => {
     this.sourceNode.connect(this.gainNode)
+    this.gainNode.connect(this.clearGain)
+    this.clearGain.connect(this.masterCompression)
+
     const freqOutputNodes = this.freqsNodes.map(
       ({ highcut, lowcut, gain, disto }) => {
         this.gainNode.connect(lowcut)
@@ -105,11 +109,13 @@ class MyAudioContext {
   }
 
   createNodes = () => {
-    return this.createSourceNode().then(() => {
-      // return this.createMicroSourceNode().then(() => {
+    // return this.createSourceNode().then(() => {
+    return this.createMicroSourceNode().then(() => {
       this.createGainNode()
-      this.createDistortionNode()
-      this.createReverbNodes()
+      this.createClearGain()
+      // this.createDistortionNode()
+      // this.createReverbNodes()
+      this.createMasterCompression()
       this.createOscillo()
       this.createSpectre()
       this.createFreqsDisto()
@@ -156,6 +162,14 @@ class MyAudioContext {
     })
   }
 
+  createClearGain = () => {
+    this.clearGain = this.context.createGain()
+    this.clearGain.gain.value = initialGain
+    this.connectController('Clear Gain', value => {
+      this.clearGain.gain.value = value
+    })
+  }
+
   createDistortionNode = () => {
     this.distortionNode = this.context.createWaveShaper()
     this.distortionNode.oversample = '4x'
@@ -163,6 +177,10 @@ class MyAudioContext {
     this.connectController('Distortion', value => {
       this.distortionNode.curve = makeDistortionCurve(parseInt(20 * value))
     })
+  }
+
+  createMasterCompression = () => {
+    this.masterCompression = this.context.createDynamicsCompressor()
   }
 
   createReverbNodes = () => {
@@ -175,8 +193,6 @@ class MyAudioContext {
     this.connectController('Reverb', value => {
       this.convolverGain.gain.value = value
     })
-
-    this.masterCompression = this.context.createDynamicsCompressor()
 
     fetch('/assets/convolver.wav')
       .then(res => res.arrayBuffer())
