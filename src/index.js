@@ -45,8 +45,8 @@ class MyAudioContext {
     this.context = null
     this.playing = false
     this.playButton = document.getElementById('play')
-    this.audioSource = new Audio('./assets/acoustic.wav')
-    this.audioSource.loop = true
+    // this.audioSource = new Audio('./assets/acoustic.wav')
+    // this.audioSource.loop = true
     this.createController('Gain', 0, 0.5, 0.05, initialGain)
     this.createController('Clear Gain', 0, 0.5, 0.05, initialGain)
     this.createController('Distortion Gain', 0, 0.5, 0.05, initialGain)
