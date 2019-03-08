@@ -1,4 +1,6 @@
 const initialGain = 0.1
+const maxGain = 1
+const maxDistortion = 1
 const initialDistortion = 0.1
 const initialReverbGain = 0
 const gainName = 'Gain'
@@ -51,17 +53,35 @@ class MyAudioContext {
     this.playButton = document.getElementById('play')
     // this.audioSource = new Audio('./assets/acoustic.wav')
     // this.audioSource.loop = true
-    this.createController(gainName, 0, 1, 0.05, initialGain)
-    this.createController(clearGainName, 0, 1, 0.05, initialGain)
-    this.createController(distortionName, 0, 1, 0.05, initialDistortion)
+    this.createController(gainName, 0, maxGain, 0.05, initialGain)
+    this.createController(clearGainName, 0, maxGain, 0.05, initialGain)
+    this.createController(
+      distortionName,
+      0,
+      maxDistortion,
+      0.05,
+      initialDistortion
+    )
     // this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
     this.osciloscopeHtml = document.getElementById('oscilloscope')
     this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
     this.spectreHtml = document.getElementById('spectre')
     this.spectreCanvas = this.spectreHtml.getContext('2d')
     frequenciesCut.forEach(([min, max]) => {
-      this.createController(getFrequencyGainName(min, max), 0, 1, 0.05, 0.5)
-      this.createController(getFrequencyControllerName(min, max), 0, 1, 0.05, 0)
+      this.createController(
+        getFrequencyGainName(min, max),
+        0,
+        maxGain,
+        0.05,
+        0.5
+      )
+      this.createController(
+        getFrequencyControllerName(min, max),
+        0,
+        maxDistortion,
+        0.05,
+        0
+      )
       this.createController(getFrequencyToneName(min, max), 0, 4000, 5, 0)
     })
   }
