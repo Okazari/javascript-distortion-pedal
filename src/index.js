@@ -51,13 +51,13 @@ class MyAudioContext {
     this.context = null
     this.playing = false
     this.playButton = document.getElementById('play')
-    this.audioSource = new Audio('./assets/acoustic.wav')
-    this.audioSource.loop = true
+    // this.audioSource.loop = true
     this.createController(gainName, 0, maxGain, 0.05, initialGain)
     this.createController(clearGainName, 0, maxGain, 0.05, initialGain)
     // this.createController(
     //   distortionName,
-    //   0,
+    //   0,Source = new Audio('./assets/acoustic.wav')
+    // this.audio
     //   maxDistortion,
     //   0.05,
     //   initialDistortion
@@ -126,8 +126,8 @@ class MyAudioContext {
   }
 
   createNodes = () => {
-    return this.createSourceNode().then(() => {
-      // return this.createMicroSourceNode().then(() => {
+    // return this.createSourceNode().then(() => {
+    return this.createMicroSourceNode().then(() => {
       this.createGainNode()
       this.createClearGain()
       // this.createDistortionNode()
