@@ -5,7 +5,7 @@ const initialDistortion = 0.1
 const initialReverbGain = 0
 const gainName = 'Gain'
 const clearGainName = 'Clear Gain'
-const DistortionName = 'Distortion'
+const distortionName = 'Distortion'
 
 const frequenciesCut = [1000, 8000]
   .map((freq, index, freqs) => {
