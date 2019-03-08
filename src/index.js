@@ -1,4 +1,4 @@
-const initialGain = 0.1
+const initialGain = 0.2
 const maxGain = 1
 const initialDistortion = 0
 const initialReverbGain = 0
