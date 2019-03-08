@@ -4,7 +4,7 @@ const maxDistortion = 1
 const initialDistortion = 0
 const initialReverbGain = 0
 const gainName = 'Gain'
-const clearGainName = 'ClearGainName'
+const clearGainName = 'Clear Gain'
 const distortionName = 'Distortion'
 
 const frequenciesCut = [160, 320, 640, 1280, 3560, 7220, 12800]
@@ -50,8 +50,8 @@ class MyAudioContext {
     this.context = null
     this.playing = false
     this.playButton = document.getElementById('play')
-    // this.audioSource = new Audio('./assets/acoustic.wav')
-    // this.audioSource.loop = true
+    this.audioSource = new Audio('./assets/acoustic.wav')
+    this.audioSource.loop = true
     this.createController(gainName, 0, maxGain, 0.05, initialGain)
     this.createController(clearGainName, 0, maxGain, 0.05, initialGain)
     this.createController(distortionName, 0, maxDistortion, 0.05, initialGain)
@@ -62,13 +62,13 @@ class MyAudioContext {
     this.spectreHtml = document.getElementById('spectre')
     this.spectreCanvas = this.spectreHtml.getContext('2d')
     frequenciesCut.forEach(([min, max]) => {
-      this.createController(
-        getFrequencyGainName(min, max),
-        0,
-        maxGain,
-        0.05,
-        0.25
-      )
+      // this.createController(
+      //   getFrequencyGainName(min, max),
+      //   0,
+      //   maxGain,
+      //   0.05,
+      //   0.25
+      // )
       this.createController(
         getFrequencyControllerName(min, max),
         0,
@@ -121,8 +121,8 @@ class MyAudioContext {
   }
 
   createNodes = () => {
-    // return this.createSourceNode().then(() => {
-    return this.createMicroSourceNode().then(() => {
+    return this.createSourceNode().then(() => {
+      // return this.createMicroSourceNode().then(() => {
       this.createGainNode()
       this.createClearGain()
       // this.createDistortionNode()
@@ -136,6 +136,10 @@ class MyAudioContext {
 
   createFreqsDisto = () => {
     this.distoGain = this.context.createGain()
+    this.connectController(
+      distortionName,
+      value => (this.distoGain.gain.value = value)
+    )
     this.distoCompression = this.context.createDynamicsCompressor()
 
     this.freqsNodes = frequenciesCut.map(([min, max]) => {
@@ -147,7 +151,7 @@ class MyAudioContext {
       highcut.frequency.value = max
       const gain = this.context.createGain()
       gain.gain.value = 0
-      this.connectController(getFrequencyGainName(min, max), value => {
+      this.connectController(getFrequencyControllerName(min, max), value => {
         gain.gain.value = value
       })
       const disto = this.context.createWaveShaper()
