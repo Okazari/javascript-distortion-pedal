@@ -1,6 +1,9 @@
-const initialGain = 0.5
-const initialDistortion = 0
+const initialGain = 0.1
+const initialDistortion = 0.1
 const initialReverbGain = 0
+const gainName = 'Gain'
+const clearGainName = 'Clear Gain'
+const DistortionName = 'Distortion'
 
 const frequenciesCut = [1000, 8000]
   .map((freq, index, freqs) => {
@@ -48,9 +51,9 @@ class MyAudioContext {
     this.playButton = document.getElementById('play')
     // this.audioSource = new Audio('./assets/acoustic.wav')
     // this.audioSource.loop = true
-    this.createController('Gain', 0, 10, 0.05, initialGain)
-    this.createController('Clear Gain', 0, 10, 0.05, initialGain)
-    this.createController('Distortion', 0, 1, 0.1, initialDistortion)
+    this.createController(gainName, 0, 1, 0.05, initialGain)
+    this.createController(clearGainName, 0, 1, 0.05, initialGain)
+    this.createController(distortionName, 0, 1, 0.05, initialDistortion)
     // this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
     this.osciloscopeHtml = document.getElementById('oscilloscope')
     this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
@@ -58,14 +61,8 @@ class MyAudioContext {
     this.spectreCanvas = this.spectreHtml.getContext('2d')
     frequenciesCut.forEach(([min, max]) => {
       this.createController(getFrequencyGainName(min, max), 0, 1, 0.05, 0.5)
-      this.createController(
-        getFrequencyControllerName(min, max),
-        0,
-        0.5,
-        0.05,
-        0
-      )
-      this.createController(getFrequencyToneName(min, max), 0, 3000, 5, 0)
+      this.createController(getFrequencyControllerName(min, max), 0, 1, 0.05, 0)
+      this.createController(getFrequencyToneName(min, max), 0, 4000, 5, 0)
     })
   }
 
@@ -157,7 +154,7 @@ class MyAudioContext {
   createGainNode = () => {
     this.gainNode = this.context.createGain()
     this.gainNode.gain.value = initialGain
-    this.connectController('Gain', value => {
+    this.connectController(gainName, value => {
       this.gainNode.gain.value = value
     })
   }
@@ -165,7 +162,7 @@ class MyAudioContext {
   createClearGain = () => {
     this.clearGain = this.context.createGain()
     this.clearGain.gain.value = initialGain
-    this.connectController('Clear Gain', value => {
+    this.connectController(clearGainName, value => {
       this.clearGain.gain.value = value
     })
   }
@@ -174,7 +171,7 @@ class MyAudioContext {
     this.distortionNode = this.context.createWaveShaper()
     this.distortionNode.oversample = '4x'
     this.distortionNode.curve = makeDistortionCurve(0)
-    this.connectController('Distortion', value => {
+    this.connectController(distortionName, value => {
       this.distortionNode.curve = makeDistortionCurve(parseInt(20 * value))
     })
   }
