@@ -1,6 +1,6 @@
 const initialGain = 0.1
 const maxGain = 1
-const maxDistortion = 1
+const maxDistortion = 2
 const initialDistortion = 0
 const initialReverbGain = 0
 const gainName = 'Gain'
@@ -50,8 +50,8 @@ class MyAudioContext {
     this.context = null
     this.playing = false
     this.playButton = document.getElementById('play')
-    this.audioSource = new Audio('./assets/acoustic.wav')
-    this.audioSource.loop = true
+    // this.audioSource = new Audio('./assets/acoustic.wav')
+    // this.audioSource.loop = true
     this.createController(gainName, 0, maxGain, 0.05, initialGain)
     this.createController(clearGainName, 0, maxGain, 0.05, initialGain)
     this.createController(distortionName, 0, maxDistortion, 0.05, initialGain)
@@ -121,8 +121,8 @@ class MyAudioContext {
   }
 
   createNodes = () => {
-    return this.createSourceNode().then(() => {
-      // return this.createMicroSourceNode().then(() => {
+    // return this.createSourceNode().then(() => {
+    return this.createMicroSourceNode().then(() => {
       this.createGainNode()
       this.createClearGain()
       // this.createDistortionNode()
