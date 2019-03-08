@@ -1,6 +1,10 @@
 const initialGain = 0.1
+const maxGain = 1
 const initialDistortion = 0
 const initialReverbGain = 0
+const gainName = 'Gain'
+const clearGainName = 'Clear Gain'
+const distortionName = 'Distortion'
 
 const frequenciesCut = [160, 320, 640, 1280, 3560, 7220, 12800]
   .map((freq, index, freqs) => {
@@ -140,7 +144,7 @@ class MyAudioContext {
   createGainNode = () => {
     this.gainNode = this.context.createGain()
     this.gainNode.gain.value = initialGain
-    this.connectController('Gain', value => {
+    this.connectController(gainName, value => {
       this.gainNode.gain.value = value
     })
   }
@@ -149,7 +153,7 @@ class MyAudioContext {
     this.distortionNode = this.context.createWaveShaper()
     this.distortionNode.oversample = '4x'
     this.distortionNode.curve = makeDistortionCurve(0)
-    this.connectController('Distortion', value => {
+    this.connectController(distortionName, value => {
       this.distortionNode.curve = makeDistortionCurve(parseInt(20 * value))
     })
   }
