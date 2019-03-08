@@ -51,17 +51,17 @@ class MyAudioContext {
     this.context = null
     this.playing = false
     this.playButton = document.getElementById('play')
-    // this.audioSource = new Audio('./assets/acoustic.wav')
-    // this.audioSource.loop = true
+    this.audioSource = new Audio('./assets/acoustic.wav')
+    this.audioSource.loop = true
     this.createController(gainName, 0, maxGain, 0.05, initialGain)
     this.createController(clearGainName, 0, maxGain, 0.05, initialGain)
-    this.createController(
-      distortionName,
-      0,
-      maxDistortion,
-      0.05,
-      initialDistortion
-    )
+    // this.createController(
+    //   distortionName,
+    //   0,
+    //   maxDistortion,
+    //   0.05,
+    //   initialDistortion
+    // )
     // this.createController('Reverb', 0, 1, 0.1, initialReverbGain)
     this.osciloscopeHtml = document.getElementById('oscilloscope')
     this.osciloCanvas = this.osciloscopeHtml.getContext('2d')
@@ -126,8 +126,8 @@ class MyAudioContext {
   }
 
   createNodes = () => {
-    // return this.createSourceNode().then(() => {
-    return this.createMicroSourceNode().then(() => {
+    return this.createSourceNode().then(() => {
+      // return this.createMicroSourceNode().then(() => {
       this.createGainNode()
       this.createClearGain()
       // this.createDistortionNode()
