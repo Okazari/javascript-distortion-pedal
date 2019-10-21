@@ -21,15 +21,6 @@ and you're good to go !
 
 ## How to use
 
-You can find a big variety of branches that illustrate a progression toward a distortion pedal.
-
-- [gain](https://github.com/Okazari/javascript-distortion-pedal/tree/gain)
-- [spectre](https://github.com/Okazari/javascript-distortion-pedal/tree/spectre)
-- [osciloscope](https://github.com/Okazari/javascript-distortion-pedal/tree/osciloscope)
-- [distortion](https://github.com/Okazari/javascript-distortion-pedal/tree/distortion)
-- [equalizer](https://github.com/Okazari/javascript-distortion-pedal/tree/equalizer)
-- [reverb](https://github.com/Okazari/javascript-distortion-pedal/tree/reverb)
-
 Theses branches represent a step to learn how to use a audio node. You can find some instruction on where you should add code to add the functionnality :
 
 - [gain](https://github.com/Okazari/javascript-distortion-pedal/tree/gain)
